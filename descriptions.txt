@@ -1,9 +1,0 @@
-I would like to create a project call travel helper, it is a website, and I want to deploy it on GitHub, I want some features, I want to a main page where I can see all my travels, in the main page I can add or delete the who travel, when I add it, I can add the travel name, travel members, travel date, and a password to it, the password is for user who every enter this travel page needs to enter the password, otherwise block it. 
-
-Inside each travel page, I want to have a itinerary page where I can add/modify/delete my schedules, I don't want my schedule to be list out all in a column, I want to have a button that I can select each day. I also want a feature that can let everyone who enters the page to add the purchase record, and can decide how to split the bills. In the record, we can categorize the purchase, such as Hotel, Commute, Plane Ticket, etc. (make it addible) 
-
-Then I want to statistic page that can display the travel expense in pie chart. It can be overall view, and can also display personal view when you select a specific member.  
-
-I know Github is a static HTML, so I still need a databse to do it, I can use some free tier database to do it such as Firebase or supabase. 
-
-Also, I want this to be able to display it on both PC and mobile since I will be using it on Mobile during travel, make sure you take care of it when planning.
