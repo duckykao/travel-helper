@@ -1,3 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build output (GitHub Actions builds this)
+dist/
+
+# Environment variables — NEVER commit these
 .env
 .env.local
-.env.example
+.env.*.local
+
+# Mac system files
+.DS_Store
+**/.DS_Store
+
+# Editor
+.vscode/
+.idea/
