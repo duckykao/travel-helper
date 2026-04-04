@@ -2,7 +2,6 @@ import { initializeApp } from 'firebase/app'
 import {
   initializeFirestore,
   persistentLocalCache,
-  persistentMultipleTabManager,
 } from 'firebase/firestore'
 
 const firebaseConfig = {
@@ -16,5 +15,5 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+  localCache: persistentLocalCache(),
 })
