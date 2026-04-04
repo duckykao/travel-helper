@@ -13,12 +13,21 @@ export function useItinerary(travelId) {
     if (!travelId) return
     const q = query(
       collection(db, 'travels', travelId, 'itinerary'),
-      orderBy('date'), orderBy('startTime')
+      orderBy('date')
     )
-    const unsub = onSnapshot(q, (snap) => {
-      setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-      setLoading(false)
-    })
+    const unsub = onSnapshot(q,
+      (snap) => {
+        const sorted = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+        setItems(sorted)
+        setLoading(false)
+      },
+      (err) => {
+        console.error('Failed to load itinerary:', err)
+        setLoading(false)
+      }
+    )
     return unsub
   }, [travelId])
 
