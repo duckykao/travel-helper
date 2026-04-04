@@ -5,7 +5,7 @@ import TravelForm from '../components/TravelForm'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function HomePage() {
-  const { travels, loading, addTravel, deleteTravel } = useTravels()
+  const { travels, loading, error, addTravel, deleteTravel } = useTravels()
   const [showForm, setShowForm] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [createError, setCreateError] = useState(null)
@@ -32,6 +32,12 @@ export default function HomePage() {
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-16">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">Could not load trips</h2>
+            <p className="text-sm text-gray-500">{error}</p>
           </div>
         ) : travels.length === 0 ? (
           <div className="text-center py-16">

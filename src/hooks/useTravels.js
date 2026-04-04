@@ -8,13 +8,22 @@ import bcrypt from 'bcryptjs'
 export function useTravels() {
   const [travels, setTravels] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const q = query(collection(db, 'travels'), orderBy('createdAt', 'desc'))
-    const unsub = onSnapshot(q, (snap) => {
-      setTravels(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-      setLoading(false)
-    })
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setTravels(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+        setLoading(false)
+      },
+      (err) => {
+        console.error('Failed to load travels:', err)
+        setError(err.message || 'Failed to load trips')
+        setLoading(false)
+      }
+    )
     return unsub
   }, [])
 
@@ -35,5 +44,5 @@ export function useTravels() {
     await deleteDoc(doc(db, 'travels', travelId))
   }
 
-  return { travels, loading, addTravel, deleteTravel }
+  return { travels, loading, error, addTravel, deleteTravel }
 }
