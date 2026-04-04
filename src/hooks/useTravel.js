@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { doc, onSnapshot } from 'firebase/firestore'
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 
 export function useTravel(travelId) {
@@ -17,5 +17,9 @@ export function useTravel(travelId) {
     return unsub
   }, [travelId])
 
-  return { travel, loading }
+  async function updateTravel(fields) {
+    await updateDoc(doc(db, 'travels', travelId), fields)
+  }
+
+  return { travel, loading, updateTravel }
 }

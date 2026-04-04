@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Modal from './Modal'
 
-export default function TravelForm({ open, onClose, onSubmit }) {
+export default function TravelForm({ open, onClose, onSubmit, onError }) {
   const [name, setName] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -29,11 +29,12 @@ export default function TravelForm({ open, onClose, onSubmit }) {
     setLoading(true)
     try {
       await onSubmit({ name, date: startDate, endDate, members, password, currency })
-      // Reset
       setName(''); setStartDate(''); setEndDate(''); setMembers([]); setPassword(''); setCurrency('USD')
-      onClose()
+    } catch (err) {
+      onError?.(err.message || 'Failed to create trip')
     } finally {
       setLoading(false)
+      onClose()
     }
   }
 

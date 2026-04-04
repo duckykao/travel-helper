@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useExpenses } from '../../hooks/useExpenses'
 import { useCategories } from '../../hooks/useCategories'
+import { useItinerary } from '../../hooks/useItinerary'
 import { useTravelContext } from '../../context/TravelContext'
 import { computeSettlements, computeBalances } from '../../utils/splitCalc'
 import { formatCurrency } from '../../utils/formatters'
@@ -15,6 +16,7 @@ export default function ExpensePage() {
   const { currentTravel } = useTravelContext()
   const { expenses, addExpense, updateExpense, deleteExpense } = useExpenses(travelId)
   const { categories, addCategory, deleteCategory } = useCategories(travelId)
+  const { items: itineraryItems } = useItinerary(travelId)
   const [showForm, setShowForm] = useState(false)
   const [showCatManager, setShowCatManager] = useState(false)
   const [editExpense, setEditExpense] = useState(null)
@@ -86,7 +88,7 @@ export default function ExpensePage() {
       ) : (
         <div className="flex flex-col gap-3">
           {expenses.map(e => (
-            <ExpenseItem key={e.id} expense={e} currency={currency}
+            <ExpenseItem key={e.id} expense={e} currency={currency} categories={categories}
               onEdit={item => { setEditExpense(item); setShowForm(true) }}
               onDelete={id => setDeleteTarget(id)} />
           ))}
@@ -101,6 +103,7 @@ export default function ExpensePage() {
         members={members}
         categories={categories}
         currency={currency}
+        itineraryItems={itineraryItems}
       />
 
       <CategoryManager

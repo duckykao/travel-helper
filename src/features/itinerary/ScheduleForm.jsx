@@ -20,9 +20,9 @@ export default function ScheduleForm({ open, onClose, onSubmit, editItem, select
     }
   }, [editItem, open])
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault()
-    await onSubmit({ title, startTime, endTime, location, description, date: selectedDate })
+    onSubmit({ title, startTime, endTime, location, description, date: selectedDate })
     onClose()
   }
 

@@ -45,6 +45,7 @@ export default function StatsPage() {
             {chartData.sort((a, b) => b.total - a.total).map(item => (
               <div key={item.label} className="flex items-center gap-3">
                 <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: item.color }} />
+                {item.icon && <span className="text-base leading-none">{item.icon}</span>}
                 <span className="text-sm text-gray-700 flex-1">{item.label}</span>
                 <span className="text-sm font-medium text-gray-900">{formatCurrency(item.total, currency)}</span>
                 <span className="text-xs text-gray-400 w-10 text-right">

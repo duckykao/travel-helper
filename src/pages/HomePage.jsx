@@ -8,6 +8,7 @@ export default function HomePage() {
   const { travels, loading, addTravel, deleteTravel } = useTravels()
   const [showForm, setShowForm] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [createError, setCreateError] = useState(null)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -22,6 +23,12 @@ export default function HomePage() {
       </header>
 
       <main className="p-4 max-w-4xl mx-auto">
+        {createError && (
+          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between gap-3">
+            <p className="text-sm text-red-700">Failed to create trip: {createError}</p>
+            <button onClick={() => setCreateError(null)} className="text-red-400 hover:text-red-600 flex-shrink-0">✕</button>
+          </div>
+        )}
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
@@ -55,6 +62,7 @@ export default function HomePage() {
         open={showForm}
         onClose={() => setShowForm(false)}
         onSubmit={addTravel}
+        onError={setCreateError}
       />
 
       <ConfirmDialog

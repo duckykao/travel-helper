@@ -90,15 +90,22 @@ export function computeSettlements(balances) {
 
 /**
  * Compute total spent per category.
- * Returns [{ label, color, total }]
+ * Returns [{ label, icon, color, total }]
+ * Matches by categoryId first (new expenses), falls back to label (legacy).
  */
 export function computeCategoryTotals(expenses, categories) {
   const totals = {}
   expenses.forEach(e => {
-    totals[e.category] = (totals[e.category] || 0) + e.amount
+    const key = e.categoryId || e.category
+    if (key) totals[key] = (totals[key] || 0) + e.amount
   })
   return categories
-    .map(cat => ({ label: cat.label, color: cat.color, total: totals[cat.label] || 0 }))
+    .map(cat => ({
+      label: cat.label,
+      icon: cat.icon || '',
+      color: cat.color,
+      total: totals[cat.id] || totals[cat.label] || 0,
+    }))
     .filter(c => c.total > 0)
 }
 
@@ -113,6 +120,7 @@ export function computeMemberCategoryTotals(expenses, categories, member) {
   })
 
   const memberExpenses = filtered.map(e => {
+    if (e.splitType === 'payer-only') return { ...e, amount: e.amount }
     const shares = computeShares(e, e.involvedMembers || [member])
     return { ...e, amount: shares[member] || 0 }
   })

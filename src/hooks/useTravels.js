@@ -5,15 +5,6 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import bcrypt from 'bcryptjs'
-
-const DEFAULT_CATEGORIES = [
-  { label: 'Hotel', color: '#FF6384' },
-  { label: 'Food', color: '#36A2EB' },
-  { label: 'Transport', color: '#FFCE56' },
-  { label: 'Entertainment', color: '#4BC0C0' },
-  { label: 'Other', color: '#9966FF' },
-]
-
 export function useTravels() {
   const [travels, setTravels] = useState([])
   const [loading, setLoading] = useState(true)
@@ -29,7 +20,7 @@ export function useTravels() {
 
   async function addTravel({ name, members, date, endDate, password, currency = 'USD' }) {
     const passwordHash = await bcrypt.hash(password, 10)
-    const travelRef = await addDoc(collection(db, 'travels'), {
+    await addDoc(collection(db, 'travels'), {
       name,
       members,
       date,
@@ -38,13 +29,6 @@ export function useTravels() {
       currency,
       createdAt: serverTimestamp(),
     })
-    // Seed default categories
-    const catCol = collection(db, 'travels', travelRef.id, 'categories')
-    await Promise.all(
-      DEFAULT_CATEGORIES.map(cat =>
-        addDoc(catCol, { ...cat, createdAt: serverTimestamp() })
-      )
-    )
   }
 
   async function deleteTravel(travelId) {

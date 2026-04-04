@@ -2,31 +2,40 @@ import { useState, useEffect } from 'react'
 import Modal from '../../components/Modal'
 import { formatCurrency } from '../../utils/formatters'
 
-export default function ExpenseForm({ open, onClose, onSubmit, editExpense, members, categories, currency }) {
+export default function ExpenseForm({ open, onClose, onSubmit, editExpense, members, categories, currency, itineraryItems = [] }) {
   const [amount, setAmount] = useState('')
   const [payer, setPayer] = useState(members[0] || '')
   const [description, setDescription] = useState('')
-  const [category, setCategory] = useState('')
+  const [categoryId, setCategoryId] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [splitType, setSplitType] = useState('equal')
   const [involvedMembers, setInvolvedMembers] = useState([...members])
   const [splitAmounts, setSplitAmounts] = useState({})
+  const [scheduleId, setScheduleId] = useState('')
 
   useEffect(() => {
     if (editExpense) {
       setAmount(String(editExpense.amount))
       setPayer(editExpense.payer)
-      setDescription(editExpense.description)
-      setCategory(editExpense.category)
+      setDescription(editExpense.description || '')
+      const matchedCat = categories.find(c => c.id === editExpense.categoryId)
+        || categories.find(c => c.label === editExpense.category)
+      setCategoryId(matchedCat?.id || categories[0]?.id || '')
       setDate(editExpense.date)
       setSplitType(editExpense.splitType)
-      setInvolvedMembers(editExpense.involvedMembers || members)
+      setInvolvedMembers(editExpense.involvedMembers || [...members])
       setSplitAmounts(editExpense.splitAmounts || {})
+      setScheduleId(editExpense.scheduleId || '')
     } else {
-      setAmount(''); setPayer(members[0] || ''); setDescription('')
-      setCategory(categories[0]?.label || '')
+      setAmount('')
+      setPayer(members[0] || '')
+      setDescription('')
+      setCategoryId(categories[0]?.id || '')
       setDate(new Date().toISOString().slice(0, 10))
-      setSplitType('equal'); setInvolvedMembers([...members]); setSplitAmounts({})
+      setSplitType('equal')
+      setInvolvedMembers([...members])
+      setSplitAmounts({})
+      setScheduleId('')
     }
   }, [editExpense, open, members, categories])
 
@@ -40,17 +49,22 @@ export default function ExpenseForm({ open, onClose, onSubmit, editExpense, memb
     ? (parseFloat(amount) / involvedMembers.length).toFixed(2)
     : '0.00'
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault()
-    await onSubmit({
+    const selectedCat = categories.find(c => c.id === categoryId)
+    const selectedSchedule = itineraryItems.find(i => i.id === scheduleId)
+    onSubmit({
       amount: parseFloat(amount),
       payer,
       description,
-      category,
+      category: selectedCat?.label || '',
+      categoryId: categoryId || '',
       date,
       splitType,
       involvedMembers,
       splitAmounts,
+      scheduleId: scheduleId || null,
+      scheduleName: selectedSchedule?.title || null,
     })
     onClose()
   }
@@ -90,11 +104,28 @@ export default function ExpenseForm({ open, onClose, onSubmit, editExpense, memb
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
             <select className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={category} onChange={e => setCategory(e.target.value)}>
-              {categories.map(c => <option key={c.id} value={c.label}>{c.label}</option>)}
+              value={categoryId} onChange={e => setCategoryId(e.target.value)}>
+              {categories.map(c => (
+                <option key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ''}{c.label}</option>
+              ))}
             </select>
           </div>
         </div>
+
+        {itineraryItems.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Linked Schedule</label>
+            <select className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={scheduleId} onChange={e => setScheduleId(e.target.value)}>
+              <option value="">None</option>
+              {itineraryItems.map(item => (
+                <option key={item.id} value={item.id}>
+                  {item.date}{item.startTime ? ` ${item.startTime}` : ''} — {item.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Split</label>
