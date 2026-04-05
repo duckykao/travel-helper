@@ -121,6 +121,7 @@ export default function ItineraryPage() {
         pins={dayPins}
         homeCoords={homeCoords}
         noLocations={!!selectedDate && dayPins.length === 0}
+        mapIcon={currentTravel?.mapIcon || 'taxi'}
       />
 
       {currentTravel && (

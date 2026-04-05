@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react'
 import Modal from './Modal'
 
+const ICON_OPTIONS = [
+  { id: 'taxi',     label: 'Yellow Taxi', emoji: '🚕' },
+  { id: 'blue-car', label: 'Blue Car',    emoji: '🚙' },
+  { id: 'red-car',  label: 'Red Car',     emoji: '🚗' },
+]
+
 function parseMapsUrl(str) {
   try {
     const url = new URL(str)
@@ -20,6 +26,7 @@ export default function TripEditModal({ open, onClose, travel, onSave }) {
   const [members, setMembers] = useState([])
   const [memberInput, setMemberInput] = useState('')
   const [homeLocation, setHomeLocation] = useState('')
+  const [mapIcon, setMapIcon] = useState('taxi')
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -30,6 +37,7 @@ export default function TripEditModal({ open, onClose, travel, onSave }) {
       setMembers([...(travel.members || [])])
       setMemberInput('')
       setHomeLocation(travel.homeLocation || '')
+      setMapIcon(travel.mapIcon || 'taxi')
     }
   }, [open])
 
@@ -46,7 +54,7 @@ export default function TripEditModal({ open, onClose, travel, onSave }) {
   async function handleSave() {
     if (!name.trim() || !startDate || !endDate || members.length === 0) return
     try {
-      await onSave({ name: name.trim(), date: startDate, endDate, members, homeLocation: homeLocation.trim() })
+      await onSave({ name: name.trim(), date: startDate, endDate, members, homeLocation: homeLocation.trim(), mapIcon })
     } finally {
       onClose()
     }
@@ -117,6 +125,19 @@ export default function TripEditModal({ open, onClose, travel, onSave }) {
               </a>
             )
           })()}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Map Icon</label>
+          <div className="flex gap-2">
+            {ICON_OPTIONS.map(opt => (
+              <button key={opt.id} type="button" onClick={() => setMapIcon(opt.id)}
+                className={`flex flex-col items-center gap-1 flex-1 py-2 rounded-xl border-2 text-xs transition-colors ${mapIcon === opt.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                <span className="text-xl">{opt.emoji}</span>
+                <span className="text-gray-500">{opt.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex gap-3 pt-1">
