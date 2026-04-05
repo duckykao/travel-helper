@@ -163,6 +163,8 @@ function MapController({ position, mapIcon }) {
           prevPosRef.current = position
           animFrameRef.current = null
           setArrived(true)
+          setRouteLine(null)
+          map.flyTo([endLat, endLng], 15, { duration: 1.0 })
         }
       }
       animFrameRef.current = requestAnimationFrame(animate)
@@ -236,8 +238,9 @@ export default function TravelMap({ open, onToggle, position, pins, homeCoords, 
             zoomControl={true}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
+              subdomains="abcd"
             />
 
             <MapController position={position} mapIcon={mapIcon} />
