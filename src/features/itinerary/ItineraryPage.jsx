@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { format, parseISO } from 'date-fns'
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
+import { extractCoords, computeMapPosition } from '../../utils/mapUtils'
+import TravelMap from './TravelMap'
 import { useItinerary } from '../../hooks/useItinerary'
 import { useExpenses } from '../../hooks/useExpenses'
 import { useCategories } from '../../hooks/useCategories'
@@ -24,20 +26,51 @@ export default function ItineraryPage() {
   const members = currentTravel?.members || []
   const currency = currentTravel?.currency || 'USD'
 
-  const [selectedDate, setSelectedDate] = useState(currentTravel?.date || '')
+  const storageKey = `it-${travelId}`
+  const [selectedDate, setSelectedDate] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(storageKey) || '{}').date || '' } catch { return '' }
+  })
   const [showForm, setShowForm] = useState(false)
   const [editItem, setEditItem] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
 
   const [moveTarget, setMoveTarget] = useState(null)
+  const [mapOpen, setMapOpen] = useState(true)
+  const [selectedScheduleId, setSelectedScheduleId] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(storageKey) || '{}').scheduleId || null } catch { return null }
+  })
+
+  const dayItems = items.filter(i => i.date === selectedDate)
+
+  const homeCoords = extractCoords(currentTravel?.homeLocation)
+  // Ignore stale selection from a different day so the map never briefly flies to the wrong spot
+  const effectiveScheduleId = dayItems.some(i => i.id === selectedScheduleId) ? selectedScheduleId : null
+  const currentPosition = computeMapPosition(items, effectiveScheduleId, homeCoords)
+  const dayPins = dayItems
+    .map(i => ({ ...i, coords: extractCoords(i.location) }))
+    .filter(i => i.coords)
+
+  // Persist selected day + schedule across reloads
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify({ date: selectedDate, scheduleId: selectedScheduleId }))
+  }, [selectedDate, selectedScheduleId, storageKey])
+
+  // Auto-select first pinnable item when user switches days (skip on initial mount)
+  const initialMountRef = useRef(true)
+  useEffect(() => {
+    if (initialMountRef.current) { initialMountRef.current = false; return }
+    const first = items
+      .filter(i => i.date === selectedDate)
+      .find(i => extractCoords(i.location))
+    setSelectedScheduleId(first?.id || null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate])
 
   // Schedule expenses modal state
   const [expenseForItem, setExpenseForItem] = useState(null)
   const [showExpenseForm, setShowExpenseForm] = useState(false)
   const [editingExpense, setEditingExpense] = useState(null)
   const [expenseDeleteTarget, setExpenseDeleteTarget] = useState(null)
-
-  const dayItems = items.filter(i => i.date === selectedDate)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -75,8 +108,21 @@ export default function ItineraryPage() {
     setEditingExpense(null)
   }
 
+  function handleSelect(id) {
+    setSelectedScheduleId(prev => prev === id ? null : id)
+  }
+
   return (
     <div>
+      <TravelMap
+        open={mapOpen}
+        onToggle={() => setMapOpen(o => !o)}
+        position={currentPosition}
+        pins={dayPins}
+        homeCoords={homeCoords}
+        noLocations={!!selectedDate && dayPins.length === 0}
+      />
+
       {currentTravel && (
         <DaySelector
           travel={currentTravel}
@@ -110,6 +156,8 @@ export default function ItineraryPage() {
                 <ScheduleItem
                   key={item.id}
                   item={item}
+                  selected={item.id === effectiveScheduleId}
+                  onSelect={() => handleSelect(item.id)}
                   onEdit={openEdit}
                   onDelete={id => setDeleteTarget(id)}
                   onAddExpense={item => setExpenseForItem(item)}

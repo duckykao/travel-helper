@@ -13,7 +13,7 @@ function parseMapsUrl(str) {
   } catch { return null }
 }
 
-export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense, onMove }) {
+export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense, onMove, selected, onSelect }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
 
   const style = {
@@ -23,7 +23,7 @@ export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense, onM
   }
 
   return (
-    <div ref={setNodeRef} style={style} className="bg-white rounded-xl border border-gray-100 p-4 flex gap-3">
+    <div ref={setNodeRef} style={style} className={`bg-white rounded-xl border p-4 flex gap-3 ${selected ? 'border-blue-400 ring-2 ring-blue-400' : 'border-gray-100'}`}>
       <button
         className="flex items-start pt-0.5 text-gray-300 hover:text-gray-400 cursor-grab active:cursor-grabbing touch-none"
         {...attributes}
@@ -37,6 +37,7 @@ export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense, onM
           <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
         </svg>
       </button>
+      <div className="flex-1 flex gap-3 min-w-0 cursor-pointer" onClick={onSelect}>
       {item.startTime && (
         <div className="flex flex-col items-center min-w-[3rem] text-xs text-gray-500">
           <span>{item.startTime}</span>
@@ -62,6 +63,7 @@ export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense, onM
           )
         })()}
         {item.description && <p className="text-sm text-gray-600 mt-1">{item.description}</p>}
+      </div>
       </div>
       <div className="flex flex-col gap-1">
         <button onClick={() => onMove(item)}

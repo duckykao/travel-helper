@@ -1,12 +1,25 @@
 import { useState, useEffect } from 'react'
 import Modal from './Modal'
 
+function parseMapsUrl(str) {
+  try {
+    const url = new URL(str)
+    if (!url.hostname.includes('google.com') && !url.hostname.includes('goo.gl')) return null
+    const placeMatch = url.pathname.match(/\/maps\/place\/([^/@]+)/)
+    if (placeMatch) return { name: decodeURIComponent(placeMatch[1].replace(/\+/g, ' ')), url: str }
+    const q = url.searchParams.get('q')
+    if (q) return { name: q, url: str }
+    return { name: null, url: str }
+  } catch { return null }
+}
+
 export default function TripEditModal({ open, onClose, travel, onSave }) {
   const [name, setName] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [members, setMembers] = useState([])
   const [memberInput, setMemberInput] = useState('')
+  const [homeLocation, setHomeLocation] = useState('')
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -16,6 +29,7 @@ export default function TripEditModal({ open, onClose, travel, onSave }) {
       setEndDate(travel.endDate || '')
       setMembers([...(travel.members || [])])
       setMemberInput('')
+      setHomeLocation(travel.homeLocation || '')
     }
   }, [open])
 
@@ -32,7 +46,7 @@ export default function TripEditModal({ open, onClose, travel, onSave }) {
   async function handleSave() {
     if (!name.trim() || !startDate || !endDate || members.length === 0) return
     try {
-      await onSave({ name: name.trim(), date: startDate, endDate, members })
+      await onSave({ name: name.trim(), date: startDate, endDate, members, homeLocation: homeLocation.trim() })
     } finally {
       onClose()
     }
@@ -84,6 +98,25 @@ export default function TripEditModal({ open, onClose, travel, onSave }) {
               </span>
             ))}
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Starting Location <span className="text-gray-400 font-normal">(optional)</span></label>
+          <input
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={homeLocation} onChange={e => setHomeLocation(e.target.value)}
+            placeholder="Paste a Google Maps URL"
+          />
+          {(() => {
+            const maps = parseMapsUrl(homeLocation)
+            if (!maps) return null
+            return (
+              <a href={maps.url} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 mt-1 text-xs text-blue-600 hover:underline">
+                📍 {maps.name || 'View on Google Maps'} ↗
+              </a>
+            )
+          })()}
         </div>
 
         <div className="flex gap-3 pt-1">
