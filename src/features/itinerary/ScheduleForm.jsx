@@ -49,12 +49,14 @@ export default function ScheduleForm({ open, onClose, onSubmit, editItem, select
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-            <input type="time" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <input type="text" inputMode="numeric" placeholder="HH:MM" maxLength={5} pattern="^([01]\d|2[0-3]):[0-5]\d$"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={startTime} onChange={e => setStartTime(e.target.value)} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-            <input type="time" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <input type="text" inputMode="numeric" placeholder="HH:MM" maxLength={5} pattern="^([01]\d|2[0-3]):[0-5]\d$"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={endTime} onChange={e => setEndTime(e.target.value)} />
           </div>
         </div>

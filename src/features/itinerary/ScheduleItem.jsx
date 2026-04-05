@@ -1,3 +1,6 @@
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
 function parseMapsUrl(str) {
   try {
     const url = new URL(str)
@@ -10,18 +13,41 @@ function parseMapsUrl(str) {
   } catch { return null }
 }
 
-export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense }) {
+export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense, onMove }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  }
+
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-4 flex gap-3">
-      <div className="flex flex-col items-center min-w-[3rem] text-xs text-gray-500">
-        <span>{item.startTime || '--:--'}</span>
-        {item.endTime && (
-          <>
-            <div className="w-px flex-1 bg-gray-200 my-1" />
-            <span>{item.endTime}</span>
-          </>
-        )}
-      </div>
+    <div ref={setNodeRef} style={style} className="bg-white rounded-xl border border-gray-100 p-4 flex gap-3">
+      <button
+        className="flex items-start pt-0.5 text-gray-300 hover:text-gray-400 cursor-grab active:cursor-grabbing touch-none"
+        {...attributes}
+        {...listeners}
+        tabIndex={-1}
+        aria-label="Drag to reorder"
+      >
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
+          <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+          <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
+        </svg>
+      </button>
+      {item.startTime && (
+        <div className="flex flex-col items-center min-w-[3rem] text-xs text-gray-500">
+          <span>{item.startTime}</span>
+          {item.endTime && (
+            <>
+              <div className="w-px flex-1 bg-gray-200 my-1" />
+              <span>{item.endTime}</span>
+            </>
+          )}
+        </div>
+      )}
       <div className="flex-1">
         <h4 className="font-medium text-gray-900">{item.title}</h4>
         {item.location && (() => {
@@ -38,6 +64,18 @@ export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense }) {
         {item.description && <p className="text-sm text-gray-600 mt-1">{item.description}</p>}
       </div>
       <div className="flex flex-col gap-1">
+        <button onClick={() => onMove(item)}
+          className="p-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-500 transition-colors"
+          title="Move to another day">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+            <polyline points="9 16 12 19 15 16"/>
+            <line x1="12" y1="13" x2="12" y2="19"/>
+          </svg>
+        </button>
         <button onClick={() => onEdit(item)}
           className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 transition-colors">
           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

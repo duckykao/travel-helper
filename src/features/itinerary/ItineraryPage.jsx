@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { format, parseISO } from 'date-fns'
+import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import { useItinerary } from '../../hooks/useItinerary'
 import { useExpenses } from '../../hooks/useExpenses'
 import { useCategories } from '../../hooks/useCategories'
@@ -9,13 +11,14 @@ import DaySelector from './DaySelector'
 import ScheduleItem from './ScheduleItem'
 import ScheduleForm from './ScheduleForm'
 import ScheduleExpensesModal from './ScheduleExpensesModal'
+import MoveDayModal from './MoveDayModal'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import ExpenseForm from '../expenses/ExpenseForm'
 
 export default function ItineraryPage() {
   const { travelId } = useParams()
   const { currentTravel } = useTravelContext()
-  const { items, addItem, updateItem, deleteItem } = useItinerary(travelId)
+  const { items, addItem, updateItem, deleteItem, reorderItems } = useItinerary(travelId)
   const { expenses, addExpense, updateExpense, deleteExpense } = useExpenses(travelId)
   const { categories } = useCategories(travelId)
   const members = currentTravel?.members || []
@@ -26,6 +29,8 @@ export default function ItineraryPage() {
   const [editItem, setEditItem] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
 
+  const [moveTarget, setMoveTarget] = useState(null)
+
   // Schedule expenses modal state
   const [expenseForItem, setExpenseForItem] = useState(null)
   const [showExpenseForm, setShowExpenseForm] = useState(false)
@@ -33,6 +38,19 @@ export default function ItineraryPage() {
   const [expenseDeleteTarget, setExpenseDeleteTarget] = useState(null)
 
   const dayItems = items.filter(i => i.date === selectedDate)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+  )
+
+  function handleDragEnd({ active, over }) {
+    if (!over || active.id === over.id) return
+    const oldIndex = dayItems.findIndex(i => i.id === active.id)
+    const newIndex = dayItems.findIndex(i => i.id === over.id)
+    const reordered = arrayMove(dayItems, oldIndex, newIndex)
+    reorderItems(reordered.map(i => i.id))
+  }
 
   async function handleSubmit(data) {
     if (editItem) {
@@ -85,17 +103,22 @@ export default function ItineraryPage() {
           <p className="text-sm">No schedule for this day yet.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {dayItems.map(item => (
-            <ScheduleItem
-              key={item.id}
-              item={item}
-              onEdit={openEdit}
-              onDelete={id => setDeleteTarget(id)}
-              onAddExpense={item => setExpenseForItem(item)}
-            />
-          ))}
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={dayItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-3">
+              {dayItems.map(item => (
+                <ScheduleItem
+                  key={item.id}
+                  item={item}
+                  onEdit={openEdit}
+                  onDelete={id => setDeleteTarget(id)}
+                  onAddExpense={item => setExpenseForItem(item)}
+                  onMove={item => setMoveTarget(item)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       <ScheduleForm
@@ -144,6 +167,14 @@ export default function ItineraryPage() {
         onConfirm={() => deleteExpense(expenseDeleteTarget)}
         title="Delete Expense"
         message="Remove this expense?"
+      />
+
+      <MoveDayModal
+        open={!!moveTarget}
+        onClose={() => setMoveTarget(null)}
+        onConfirm={newDate => updateItem(moveTarget.id, { date: newDate })}
+        travel={currentTravel}
+        currentDate={moveTarget?.date}
       />
     </div>
   )

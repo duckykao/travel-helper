@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   collection, onSnapshot, addDoc, updateDoc, deleteDoc,
-  doc, serverTimestamp, query, orderBy
+  doc, serverTimestamp, query, orderBy, writeBatch
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
@@ -19,7 +19,12 @@ export function useItinerary(travelId) {
       (snap) => {
         const sorted = snap.docs
           .map(d => ({ id: d.id, ...d.data() }))
-          .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+          .sort((a, b) => {
+            const aOrder = a.sortOrder ?? Infinity
+            const bOrder = b.sortOrder ?? Infinity
+            if (aOrder !== bOrder) return aOrder - bOrder
+            return (a.startTime || '').localeCompare(b.startTime || '')
+          })
         setItems(sorted)
         setLoading(false)
       },
@@ -34,6 +39,7 @@ export function useItinerary(travelId) {
   async function addItem(data) {
     await addDoc(collection(db, 'travels', travelId, 'itinerary'), {
       ...data,
+      sortOrder: Date.now(),
       createdAt: serverTimestamp(),
     })
   }
@@ -46,5 +52,13 @@ export function useItinerary(travelId) {
     await deleteDoc(doc(db, 'travels', travelId, 'itinerary', itemId))
   }
 
-  return { items, loading, addItem, updateItem, deleteItem }
+  async function reorderItems(orderedIds) {
+    const batch = writeBatch(db)
+    orderedIds.forEach((id, index) => {
+      batch.update(doc(db, 'travels', travelId, 'itinerary', id), { sortOrder: index * 1000 })
+    })
+    await batch.commit()
+  }
+
+  return { items, loading, addItem, updateItem, deleteItem, reorderItems }
 }
