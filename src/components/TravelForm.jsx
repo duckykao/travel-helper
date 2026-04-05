@@ -104,6 +104,7 @@ export default function TravelForm({ open, onClose, onSubmit, onError }) {
           <input type="password"
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={password} onChange={e => setPassword(e.target.value)} required placeholder="Set a password for this trip"
+            autoComplete="new-password"
           />
           <p className="text-xs text-gray-400 mt-1">This is a soft lock for sharing the trip link — not high security.</p>
         </div>

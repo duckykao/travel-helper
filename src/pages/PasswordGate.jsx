@@ -76,6 +76,7 @@ export default function PasswordGate() {
             onChange={e => setPassword(e.target.value)}
             placeholder="Password"
             className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            autoComplete="off"
             autoFocus
           />
 

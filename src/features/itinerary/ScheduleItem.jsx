@@ -1,4 +1,16 @@
-export default function ScheduleItem({ item, onEdit, onDelete }) {
+function parseMapsUrl(str) {
+  try {
+    const url = new URL(str)
+    if (!url.hostname.includes('google.com') && !url.hostname.includes('goo.gl')) return null
+    const placeMatch = url.pathname.match(/\/maps\/place\/([^/@]+)/)
+    if (placeMatch) return { name: decodeURIComponent(placeMatch[1].replace(/\+/g, ' ')), url: str }
+    const q = url.searchParams.get('q')
+    if (q) return { name: q, url: str }
+    return { name: null, url: str }
+  } catch { return null }
+}
+
+export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense }) {
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-4 flex gap-3">
       <div className="flex flex-col items-center min-w-[3rem] text-xs text-gray-500">
@@ -12,7 +24,17 @@ export default function ScheduleItem({ item, onEdit, onDelete }) {
       </div>
       <div className="flex-1">
         <h4 className="font-medium text-gray-900">{item.title}</h4>
-        {item.location && <p className="text-xs text-gray-500 mt-0.5">📍 {item.location}</p>}
+        {item.location && (() => {
+          const maps = parseMapsUrl(item.location)
+          return maps ? (
+            <a href={maps.url} target="_blank" rel="noopener noreferrer"
+              className="text-xs text-blue-500 mt-0.5 hover:underline block">
+              📍 {maps.name || 'View on Google Maps'} ↗
+            </a>
+          ) : (
+            <p className="text-xs text-gray-500 mt-0.5">📍 {item.location}</p>
+          )
+        })()}
         {item.description && <p className="text-sm text-gray-600 mt-1">{item.description}</p>}
       </div>
       <div className="flex flex-col gap-1">
@@ -21,6 +43,14 @@ export default function ScheduleItem({ item, onEdit, onDelete }) {
           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+        <button onClick={() => onAddExpense(item)}
+          className="p-1.5 rounded-lg bg-green-50 hover:bg-green-100 text-green-500 transition-colors"
+          title="Add expense">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v12M9 9h4.5a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3H15"/>
           </svg>
         </button>
         <button onClick={() => onDelete(item.id)}

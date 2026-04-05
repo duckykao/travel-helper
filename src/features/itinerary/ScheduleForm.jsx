@@ -1,6 +1,18 @@
 import { useState, useEffect } from 'react'
 import Modal from '../../components/Modal'
 
+function parseMapsUrl(str) {
+  try {
+    const url = new URL(str)
+    if (!url.hostname.includes('google.com') && !url.hostname.includes('goo.gl')) return null
+    const placeMatch = url.pathname.match(/\/maps\/place\/([^/@]+)/)
+    if (placeMatch) return { name: decodeURIComponent(placeMatch[1].replace(/\+/g, ' ')), url: str }
+    const q = url.searchParams.get('q')
+    if (q) return { name: q, url: str }
+    return { name: null, url: str }
+  } catch { return null }
+}
+
 export default function ScheduleForm({ open, onClose, onSubmit, editItem, selectedDate }) {
   const [title, setTitle] = useState('')
   const [startTime, setStartTime] = useState('')
@@ -50,6 +62,16 @@ export default function ScheduleForm({ open, onClose, onSubmit, editItem, select
           <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
           <input className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={location} onChange={e => setLocation(e.target.value)} placeholder="Optional" />
+          {(() => {
+            const maps = parseMapsUrl(location)
+            if (!maps) return null
+            return (
+              <a href={maps.url} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 mt-1 text-xs text-blue-600 hover:underline">
+                📍 {maps.name || 'View on Google Maps'} ↗
+              </a>
+            )
+          })()}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>

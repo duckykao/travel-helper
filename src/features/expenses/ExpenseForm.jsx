@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Modal from '../../components/Modal'
 import { formatCurrency } from '../../utils/formatters'
 
-export default function ExpenseForm({ open, onClose, onSubmit, editExpense, members, categories, currency, itineraryItems = [] }) {
+export default function ExpenseForm({ open, onClose, onSubmit, editExpense, members, categories, currency, itineraryItems = [], initialScheduleId = '' }) {
   const [amount, setAmount] = useState('')
   const [payer, setPayer] = useState(members[0] || '')
   const [description, setDescription] = useState('')
@@ -35,7 +35,7 @@ export default function ExpenseForm({ open, onClose, onSubmit, editExpense, memb
       setSplitType('equal')
       setInvolvedMembers([...members])
       setSplitAmounts({})
-      setScheduleId('')
+      setScheduleId(initialScheduleId)
     }
   }, [editExpense, open, members, categories])
 
