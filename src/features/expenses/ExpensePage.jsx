@@ -15,7 +15,7 @@ export default function ExpensePage() {
   const { travelId } = useParams()
   const { currentTravel } = useTravelContext()
   const { expenses, addExpense, updateExpense, deleteExpense } = useExpenses(travelId)
-  const { categories, addCategory, deleteCategory } = useCategories(travelId)
+  const { categories, addCategory, deleteCategory, updateCategory } = useCategories(travelId)
   const { items: itineraryItems } = useItinerary(travelId)
   const [showForm, setShowForm] = useState(false)
   const [showCatManager, setShowCatManager] = useState(false)
@@ -112,6 +112,7 @@ export default function ExpensePage() {
         categories={categories}
         onAdd={addCategory}
         onDelete={deleteCategory}
+        onUpdate={updateCategory}
       />
 
       <ConfirmDialog

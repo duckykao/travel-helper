@@ -27,14 +27,6 @@ export default function TravelCard({ travel, onDelete }) {
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-1">
-        {travel.members?.map(m => (
-          <span key={m} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
-            {m}
-          </span>
-        ))}
-      </div>
-
       <button
         onClick={() => navigate(`/travel/${travel.id}`)}
         className="w-full mt-1 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"

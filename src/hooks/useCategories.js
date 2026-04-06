@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   collection, onSnapshot, addDoc, deleteDoc,
-  doc, query
+  doc, query, updateDoc
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { DEFAULT_CATEGORIES } from '../utils/defaultCategories'
@@ -52,5 +52,10 @@ export function useCategories(travelId) {
     await deleteDoc(doc(db, 'travels', travelId, 'categories', categoryId))
   }
 
-  return { categories, loading, addCategory, deleteCategory }
+  async function updateCategory(categoryId, { label, color, icon = '' }) {
+    if (categoryId.startsWith('default-')) return
+    await updateDoc(doc(db, 'travels', travelId, 'categories', categoryId), { label, color, icon })
+  }
+
+  return { categories, loading, addCategory, deleteCategory, updateCategory }
 }
