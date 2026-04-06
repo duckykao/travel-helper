@@ -1,5 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { extractCoords } from '../../utils/mapUtils'
 
 function parseMapsUrl(str) {
   try {
@@ -13,7 +14,7 @@ function parseMapsUrl(str) {
   } catch { return null }
 }
 
-export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense, onMove, selected, onSelect }) {
+export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense, onMove, selected, onSelect, onToggleLandmark, showAllLandmarks }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
 
   const style = {
@@ -66,6 +67,17 @@ export default function ScheduleItem({ item, onEdit, onDelete, onAddExpense, onM
       </div>
       </div>
       <div className="flex flex-col gap-1">
+        {extractCoords(item.location) && (
+          <button
+            onClick={() => onToggleLandmark(item)}
+            className={`p-1.5 rounded-lg transition-colors ${showAllLandmarks || item.showLandmark ? 'bg-blue-100 text-blue-500' : 'bg-gray-50 text-gray-300 hover:bg-blue-50 hover:text-blue-400'}`}
+            title={item.showLandmark ? 'Hide landmark' : 'Show as landmark'}
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+          </button>
+        )}
         <button onClick={() => onMove(item)}
           className="p-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-500 transition-colors"
           title="Move to another day">

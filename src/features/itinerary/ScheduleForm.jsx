@@ -19,6 +19,7 @@ export default function ScheduleForm({ open, onClose, onSubmit, editItem, select
   const [endTime, setEndTime] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
+  const [showLandmark, setShowLandmark] = useState(false)
 
   useEffect(() => {
     if (editItem) {
@@ -27,14 +28,16 @@ export default function ScheduleForm({ open, onClose, onSubmit, editItem, select
       setEndTime(editItem.endTime || '')
       setLocation(editItem.location || '')
       setDescription(editItem.description || '')
+      setShowLandmark(editItem.showLandmark || false)
     } else {
       setTitle(''); setStartTime(''); setEndTime(''); setLocation(''); setDescription('')
+      setShowLandmark(false)
     }
   }, [editItem, open])
 
   function handleSubmit(e) {
     e.preventDefault()
-    onSubmit({ title, startTime, endTime, location, description, date: selectedDate })
+    onSubmit({ title, startTime, endTime, location, description, showLandmark, date: selectedDate })
     onClose()
   }
 
@@ -74,6 +77,18 @@ export default function ScheduleForm({ open, onClose, onSubmit, editItem, select
               </a>
             )
           })()}
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">Show as landmark on map</span>
+          <button
+            type="button"
+            onClick={() => setShowLandmark(v => !v)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${showLandmark ? 'bg-blue-600' : 'bg-gray-200'}`}
+            role="switch"
+            aria-checked={showLandmark}
+          >
+            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${showLandmark ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+          </button>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>

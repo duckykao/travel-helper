@@ -36,6 +36,7 @@ export default function ItineraryPage() {
 
   const [moveTarget, setMoveTarget] = useState(null)
   const [mapOpen, setMapOpen] = useState(true)
+  const [showAllLandmarks, setShowAllLandmarks] = useState(false)
   const [selectedScheduleId, setSelectedScheduleId] = useState(() => {
     try { return JSON.parse(localStorage.getItem(storageKey) || '{}').scheduleId || null } catch { return null }
   })
@@ -65,7 +66,7 @@ export default function ItineraryPage() {
   }, [effectiveScheduleId, items])
   const dayPins = dayItems
     .map(i => ({ ...i, coords: extractCoords(i.location) }))
-    .filter(i => i.coords)
+    .filter(i => i.coords && (showAllLandmarks || i.showLandmark))
 
   // Persist selected day + schedule across reloads
   useEffect(() => {
@@ -129,6 +130,10 @@ export default function ItineraryPage() {
     setSelectedScheduleId(prev => prev === id ? null : id)
   }
 
+  function handleToggleLandmark(item) {
+    updateItem(item.id, { showLandmark: !item.showLandmark })
+  }
+
   return (
     <div className="h-full flex flex-col">
       <TravelMap
@@ -137,7 +142,7 @@ export default function ItineraryPage() {
         position={currentPosition}
         pins={dayPins}
         homeCoords={homeCoords}
-        noLocations={!!selectedDate && dayPins.length === 0}
+        noLocations={!!selectedDate && dayItems.every(i => !extractCoords(i.location))}
         mapIcon={currentTravel?.mapIcon || 'taxi'}
       />
 
@@ -153,12 +158,23 @@ export default function ItineraryPage() {
         <h2 className="text-sm font-medium text-gray-500">
           {selectedDate ? format(parseISO(selectedDate), 'EEEE, MMMM d') : 'Select a day'}
         </h2>
-        <button
-          onClick={() => { setEditItem(null); setShowForm(true) }}
-          className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700"
-        >
-          + Add
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAllLandmarks(v => !v)}
+            className={`p-1.5 rounded-lg border transition-colors ${showAllLandmarks ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400 border-gray-200 hover:border-blue-400 hover:text-blue-500'}`}
+            title={showAllLandmarks ? 'Showing all landmarks — click to use per-item settings' : 'Show all landmarks'}
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+          </button>
+          <button
+            onClick={() => { setEditItem(null); setShowForm(true) }}
+            className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700"
+          >
+            + Add
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0">
@@ -181,6 +197,8 @@ export default function ItineraryPage() {
                     onDelete={id => setDeleteTarget(id)}
                     onAddExpense={item => setExpenseForItem(item)}
                     onMove={item => setMoveTarget(item)}
+                    onToggleLandmark={handleToggleLandmark}
+                    showAllLandmarks={showAllLandmarks}
                   />
                 ))}
               </div>

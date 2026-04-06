@@ -16,12 +16,15 @@ function makeIcon(content) {
   })
 }
 
-// Plain dot pin — no number
-const dotPin = L.divIcon({
+// Blue landmark pin
+const landmarkPin = L.divIcon({
   className: '',
-  html: `<div style="width:10px;height:10px;border-radius:50%;background:#6b7280;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`,
-  iconAnchor: [5, 5],
-  popupAnchor: [0, -8],
+  html: `<svg width="18" height="24" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 8.25 12 20 12 20S24 20.25 24 12C24 5.373 18.627 0 12 0z" fill="#3B82F6" stroke="white" stroke-width="1.5"/>
+    <circle cx="12" cy="12" r="4.5" fill="white"/>
+  </svg>`,
+  iconAnchor: [9, 24],
+  popupAnchor: [0, -26],
 })
 
 const CAR_SCHEMES = {
@@ -255,7 +258,7 @@ export default function TravelMap({ open, onToggle, position, pins, homeCoords, 
               <Marker
                 key={pin.id}
                 position={[pin.coords.lat, pin.coords.lng]}
-                icon={dotPin}
+                icon={landmarkPin}
               >
                 <Popup>{pin.title}{pin.startTime ? ` · ${pin.startTime}` : ''}</Popup>
               </Marker>
