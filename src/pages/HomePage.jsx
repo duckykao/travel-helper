@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTravels } from '../hooks/useTravels'
 import TravelCard from '../components/TravelCard'
 import TravelForm from '../components/TravelForm'
-import ConfirmDialog from '../components/ConfirmDialog'
+import DeleteTripModal from '../components/DeleteTripModal'
 
 export default function HomePage() {
   const { travels, loading, error, addTravel, deleteTravel } = useTravels()
@@ -57,7 +57,7 @@ export default function HomePage() {
               <TravelCard
                 key={t.id}
                 travel={t}
-                onDelete={id => setDeleteTarget(id)}
+                onDelete={travel => setDeleteTarget(travel)}
               />
             ))}
           </div>
@@ -71,12 +71,11 @@ export default function HomePage() {
         onError={setCreateError}
       />
 
-      <ConfirmDialog
+      <DeleteTripModal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        onConfirm={() => deleteTravel(deleteTarget)}
-        title="Delete Trip"
-        message="Are you sure you want to delete this trip? All data will be permanently lost."
+        travel={deleteTarget}
+        onConfirm={deleteTravel}
       />
     </div>
   )

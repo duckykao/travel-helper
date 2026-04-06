@@ -14,7 +14,7 @@ export default function TravelCard({ travel, onDelete }) {
           </p>
         </div>
         <button
-          onClick={() => onDelete(travel.id)}
+          onClick={() => onDelete(travel)}
           className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 transition-colors"
           aria-label="Delete travel"
         >

@@ -113,7 +113,7 @@ export default function ItineraryPage() {
   }
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       <TravelMap
         open={mapOpen}
         onToggle={() => setMapOpen(o => !o)}
@@ -144,31 +144,33 @@ export default function ItineraryPage() {
         </button>
       </div>
 
-      {dayItems.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
-          <div className="text-3xl mb-2">🗓️</div>
-          <p className="text-sm">No schedule for this day yet.</p>
-        </div>
-      ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={dayItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
-            <div className="flex flex-col gap-3">
-              {dayItems.map(item => (
-                <ScheduleItem
-                  key={item.id}
-                  item={item}
-                  selected={item.id === effectiveScheduleId}
-                  onSelect={() => handleSelect(item.id)}
-                  onEdit={openEdit}
-                  onDelete={id => setDeleteTarget(id)}
-                  onAddExpense={item => setExpenseForItem(item)}
-                  onMove={item => setMoveTarget(item)}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-      )}
+      <div className="flex-1 overflow-y-auto min-h-0">
+        {dayItems.length === 0 ? (
+          <div className="text-center py-12 text-gray-400">
+            <div className="text-3xl mb-2">🗓️</div>
+            <p className="text-sm">No schedule for this day yet.</p>
+          </div>
+        ) : (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={dayItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              <div className="flex flex-col gap-3 pb-4">
+                {dayItems.map(item => (
+                  <ScheduleItem
+                    key={item.id}
+                    item={item}
+                    selected={item.id === effectiveScheduleId}
+                    onSelect={() => handleSelect(item.id)}
+                    onEdit={openEdit}
+                    onDelete={id => setDeleteTarget(id)}
+                    onAddExpense={item => setExpenseForItem(item)}
+                    onMove={item => setMoveTarget(item)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+      </div>
 
       <ScheduleForm
         open={showForm}
