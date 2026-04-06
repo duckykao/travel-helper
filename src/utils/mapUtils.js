@@ -11,7 +11,7 @@ export function extractCoords(locationStr) {
 }
 
 export function computeMapPosition(allItems, selectedId, homeCoords) {
-  if (!selectedId) return homeCoords || null
+  if (!selectedId) return undefined
 
   const sorted = [...allItems].sort((a, b) => {
     if (a.date !== b.date) return a.date.localeCompare(b.date)
@@ -21,10 +21,9 @@ export function computeMapPosition(allItems, selectedId, homeCoords) {
   const idx = sorted.findIndex(i => i.id === selectedId)
   if (idx === -1) return homeCoords || null
 
-  for (let i = idx; i >= 0; i--) {
-    const coords = extractCoords(sorted[i].location)
-    if (coords) return coords
-  }
+  const coords = extractCoords(sorted[idx].location)
+  if (coords) return coords
 
-  return homeCoords || null
+  // Selected item has no location — signal "stay put" with undefined
+  return undefined
 }

@@ -45,7 +45,24 @@ export default function ItineraryPage() {
   const homeCoords = extractCoords(currentTravel?.homeLocation)
   // Ignore stale selection from a different day so the map never briefly flies to the wrong spot
   const effectiveScheduleId = dayItems.some(i => i.id === selectedScheduleId) ? selectedScheduleId : null
-  const currentPosition = computeMapPosition(items, effectiveScheduleId, homeCoords)
+
+  // Track car position in state; only update when the selected item has a real location.
+  // undefined from computeMapPosition means "no location — stay where you are".
+  const [currentPosition, setCurrentPosition] = useState(null)
+  const homePositionSet = useRef(false)
+  // Set initial position to home once homeCoords loads from Firestore (runs once)
+  useEffect(() => {
+    if (homeCoords && !homePositionSet.current) {
+      homePositionSet.current = true
+      setCurrentPosition(homeCoords)
+    }
+  }, [homeCoords])
+  useEffect(() => {
+    const p = computeMapPosition(items, effectiveScheduleId, homeCoords)
+    if (p !== undefined) setCurrentPosition(p)
+  // homeCoords is derived from currentTravel which is stable; items/effectiveScheduleId drive real changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveScheduleId, items])
   const dayPins = dayItems
     .map(i => ({ ...i, coords: extractCoords(i.location) }))
     .filter(i => i.coords)
