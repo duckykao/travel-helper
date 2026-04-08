@@ -60,20 +60,10 @@ export default function ItineraryPage() {
   }, [homeCoords])
   useEffect(() => {
     const p = computeMapPosition(items, effectiveScheduleId, homeCoords)
-    if (p !== undefined) {
-      setCurrentPosition(p)
-    } else if (!effectiveScheduleId) {
-      // No selection — place car at first location of the current day
-      const firstWithCoords = items
-        .filter(i => i.date === selectedDate)
-        .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
-        .find(i => extractCoords(i.location))
-      const coords = firstWithCoords ? extractCoords(firstWithCoords.location) : null
-      if (coords) setCurrentPosition(coords)
-    }
-  // homeCoords is derived from currentTravel which is stable; items/effectiveScheduleId/selectedDate drive real changes
+    if (p !== undefined) setCurrentPosition(p)
+  // homeCoords is derived from currentTravel which is stable; items/effectiveScheduleId drive real changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectiveScheduleId, items, selectedDate])
+  }, [effectiveScheduleId, items])
   const dayPins = dayItems
     .map(i => ({ ...i, coords: extractCoords(i.location) }))
     .filter(i => i.coords && (showAllLandmarks || i.showLandmark))
